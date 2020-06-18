@@ -1,0 +1,31 @@
+%%%-------------------------------------------------------------------
+%% @doc erlbank_statements public API
+%% @end
+%%%-------------------------------------------------------------------
+
+-module(erlbank_statements_app).
+
+-behaviour(application).
+
+-export([start/2, stop/1]).
+
+start_cowboy() ->
+    %% Cowboy test code
+    Dispatch = cowboy_router:compile([{'_',
+				       [{"/", web_frontend, index},
+					{"/accounts/open", web_frontend,
+					 open_account},
+					{"/transactions/create", web_frontend,
+					 create_transaction},
+					{"/bank-statements/request",
+					 web_frontend, request}]}]),
+    {ok, _} = cowboy:start_clear(my_http_listener,
+				 [{port, 8000}],
+				 #{env => #{dispatch => Dispatch}}).
+
+start(_StartType, _StartArgs) ->
+    database:init_database(),
+    start_cowboy(),
+    erlbank_statements_sup:start_link().
+
+stop(_State) -> ok.
