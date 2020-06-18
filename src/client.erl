@@ -2,39 +2,14 @@
 
 -module(client).
 -include("data.hrl").
--export([open_account/2, transfer/3, bank_statement/1]).
-
-
+-export([bank_statement/1, create_account/4, create_transaction/5]).
 
 %% returns the name of the person associated to the account 
 %% given by account number.
 -spec name_by_account_nr(account_number()) -> string().
 name_by_account_nr(AccountNumber) ->
     {ok, Account} = database:get_account(AccountNumber),
-    {ok, Person}  = database:get_person(Account#account.person_id),
-    binary_to_list(Person#person.firstname) ++ " " ++ binary_to_list(Person#person.surname).
-
-
-%% opens an acocunt with a given first and surname.
-%% prints the result and the account number to stdout.
--spec open_account(binary(), binary()) -> ok.
-open_account(Firstname, Surname) ->
-    Account = business_logic:open_account(Firstname, Surname),
-    io:format("Account was successfully opened. Account number: ~p ~n", [Account#account.account_number]).
-
-
-%% transfers a given amount from the first account to the second account, identified
-%% by their account number. Prints the transaction-id when successful, else the error
-%% to stdout.
--spec transfer(account_number(), account_number(), money()) -> ok.
-transfer(SenderAccountNumber, ReceiverAccountNumber, Amount) ->
-    case business_logic:transfer(SenderAccountNumber, ReceiverAccountNumber, Amount) of
-        {ok, TxId} ->
-            io:format("Transaction successful, id: ~p~n", [TxId]);
-        {error, Err} ->
-            io:format("An error occured: ~p~n", [Err])
-        end.
-
+    binary_to_list(Account#account.firstname) ++ " " ++ binary_to_list(Account#account.surname).
 
 
 %% prints the header of a bank statement, namely the full name and the
@@ -65,7 +40,7 @@ print_txs(Txs) ->
 %% That is a full name, the current balance, and a list of
 %% transactions associated with the account.
 bank_statement(AccountNumber) ->
-    Txs = database:get_all_transactions(),
+    Txs = database:get_all_transactions(AccountNumber),
     RelevantTxs = lists:filter(fun(Tx) -> Tx#transaction.from_acc_nr == AccountNumber orelse
                                               Tx#transaction.to_acc_nr == AccountNumber
                                end, Txs),
@@ -76,3 +51,11 @@ bank_statement(AccountNumber) ->
     print_txs(SortedRelevantTxs),
 
     io:format("~n~n", []).
+
+create_account(Number, Firstname, Surname, Amount) ->
+    Account = #account{account_number = Number, firstname = Firstname, surname = Surname, amount = Amount},
+    database:put_account(Account).
+
+create_transaction(Id, Timestamp, From, To, Amount) ->
+    Transaction = #transaction{id = Id, timestamp = Timestamp, from_acc_nr = From, to_acc_nr = To, amount = Amount},
+    database:put_transaction(Transaction).
