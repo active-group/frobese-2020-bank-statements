@@ -28,8 +28,12 @@ start_link() ->
 init([]) ->
     SupFlags = #{strategy => one_for_all, intensity => 0,
 		 period => 1},
-    ChildSpecs = [],
+    ChildSpecs = child_specs(),
     {ok, {SupFlags, ChildSpecs}}.
+
+child_specs() ->
+    [#{id => subserver,       % mandatory
+       start => {subserver, start, [[]]}}].      % mandatory
 
 %% internal functions
 

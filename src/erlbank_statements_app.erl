@@ -20,7 +20,7 @@ start_cowboy() ->
 				 #{env => #{dispatch => Dispatch}}).
 
 start(_StartType, _StartArgs) ->
-    database:init_database(),
+    % database:init_database(),
     start_cowboy(),
     erlbank_statements_sup:start_link().
 
