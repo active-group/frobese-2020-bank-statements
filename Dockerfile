@@ -18,7 +18,9 @@ RUN rebar3 release
 
 
 # Expose relevant ports
-EXPOSE 8000
+EXPOSE 9001
+EXPOSE 8443
+EXPOSE 4369
 
 ENTRYPOINT ["/buildroot/entrypoint.sh"]
 
