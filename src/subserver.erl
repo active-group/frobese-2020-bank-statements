@@ -15,7 +15,7 @@ init(_) ->
     {ok, #{}, {continue, register}}. % Anfangszustand vom gen_server
 
 start(_) ->
-    gen_server:start({global, global_inc}, ?MODULE, [], []).
+    gen_server:start({global, subserver}, ?MODULE, [], []).
                                                   % ^ wird an init übergeben
 
 
@@ -32,13 +32,13 @@ handle_continue(register, State) ->
 
 handle_info({replay, Accounts}, State) when is_list(Accounts) ->
     lists:foreach(fun (Account) -> 
-        case Account of
-            #{account_number := Number, amount := Amount, firstname := Firstname, surname := Surname} ->
-                business_logic:create_account(Number, Firstname, Surname, Amount);
-            _ -> error      
-        end, 
-        Accounts
-    end),
+            case Account of
+                #{account_number := Number, amount := Amount, firstname := Firstname, surname := Surname} ->
+                    business_logic:create_account(Number, Firstname, Surname, Amount);
+                _ -> error      
+            end
+        end,
+        Accounts),
     {noreply, State};
 
 handle_info({new, Account}, State) when is_map(Account) ->
