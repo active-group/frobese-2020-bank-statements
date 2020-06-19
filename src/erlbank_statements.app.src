@@ -6,6 +6,9 @@
   {applications,
    [kernel,
     stdlib,
+    lager,
+    jiffy,
+    lager_logstash_backend,
     cowboy
    ]},
   {env,[]},
