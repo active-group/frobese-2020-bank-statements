@@ -17,9 +17,11 @@ start(_) ->
     gen_server:start({global, accounts}, ?MODULE, [], []).
                                                   % ^ wird an init übergeben
 
-handle_cast({replay, _Node, Pid}, State) ->
-    Pid ! #{account_number => 0, amount => 100000, firstname => <<"Alice">>, surname => <<"Bobbins">>},
-    Pid ! #{account_number => 1, amount => 100000, firstname => <<"Bob">>, surname => <<"Alisons">>},
+handle_cast({replay, Pid}, State) ->
+    Pid ! {replay, [
+        #{account_number => 0, amount => 100000, firstname => <<"Alice">>, surname => <<"Bobbins">>},
+        #{account_number => 1, amount => 100000, firstname => <<"Bob">>, surname => <<"Alisons">>}
+    ]},
     {noreply, State};
 
 handle_cast(_Msg, State) ->

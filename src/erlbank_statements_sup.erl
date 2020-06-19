@@ -33,7 +33,7 @@ init([]) ->
 
 child_specs() ->
     [
-        #{id => accounts_faker, start => {accounts_faker, start, [[]]}},
+        % #{id => accounts_faker, start => {accounts_faker, start, [[]]}},
         #{id => transaction_faker, start => {transaction_faker, start, [[]]}},
         #{id => subserver, start => {subserver, start, [[]]}}
     ].     
