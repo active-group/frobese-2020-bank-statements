@@ -28,8 +28,14 @@ start_link() ->
 init([]) ->
     SupFlags = #{strategy => one_for_all, intensity => 0,
 		 period => 1},
-    ChildSpecs = [],
+    ChildSpecs = child_specs(),
     {ok, {SupFlags, ChildSpecs}}.
 
+child_specs() ->
+    [
+        % #{id => accounts_faker, start => {accounts_faker, start, [[]]}},
+        #{id => transaction_faker, start => {transaction_faker, start, [[]]}},
+        #{id => subserver, start => {subserver, start, [[]]}}
+    ].     
 %% internal functions
 

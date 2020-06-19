@@ -2,9 +2,9 @@
 
 -module(database).
 -include("data.hrl").
--export([init_database/0,
+-export([init_database/0, unique_tx_id/0,
          put_account/1, get_account/1,
-         put_transaction/1, get_all_transactions/1]).
+         put_transaction/1, get_all_transactions/0, get_all_transactions/1]).
 
 %% destroy tables in case they already existed
 destroy_tables() ->
@@ -40,11 +40,11 @@ read_one(Table, Id) ->
         [_ | _] -> {error, more_than_one}
     end.
 
-% -spec read_all(mnesia:table()) -> list(tuple()).
-% read_all(Table) ->
-%     Fun = fun() -> mnesia:select(Table,[{'_',[],['$_']}]) end,
-%     {atomic, Res} = mnesia:transaction(Fun),
-%     Res.
+-spec read_all(mnesia:table()) -> list(tuple()).
+read_all(Table) ->
+    Fun = fun() -> mnesia:select(Table,[{'_',[],['$_']}]) end,
+    {atomic, Res} = mnesia:transaction(Fun),
+    Res.
 
 
 %% ALL
@@ -64,9 +64,9 @@ put_transaction(Transaction) ->
 % get_transaction(TransactionId) ->
 %     read_one(transaction, TransactionId).
 
-% -spec get_all_transactions() -> list(#transaction{}).
-% get_all_transactions() ->
-%     read_all(transaction).
+-spec get_all_transactions() -> list(#transaction{}).
+get_all_transactions() ->
+    read_all(transaction).
 
 -spec get_all_transactions(account_number()) -> list(#transaction{}).
 get_all_transactions(AccountNr) ->
@@ -80,3 +80,15 @@ get_all_transactions(AccountNr) ->
           end,
     {atomic, Res} = mnesia:transaction(Fun),
     Res.
+
+-spec unique_tx_id() -> unique_id().
+unique_tx_id() ->
+    All = get_all_transactions(),
+    TxNumbers = lists:map(fun(Tx) -> Tx#transaction.id end, All),
+    next_higher_id(TxNumbers).
+
+-spec next_higher_id(list(integer())) -> unique_id().
+next_higher_id([]) ->
+    0;
+next_higher_id(L) ->
+    lists:max(L) + 1.
