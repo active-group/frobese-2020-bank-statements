@@ -1,6 +1,7 @@
 -module(subserver).
 
 -behavior(gen_server).
+-c(logger).
 
 -include("trans_data.hrl").
 
@@ -18,7 +19,6 @@ start(_) ->
                                                   % ^ wird an init übergeben
 
 
-
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
@@ -31,13 +31,22 @@ handle_continue(register, State) ->
     {noreply, State}.
 
 
-handle_info(_Msg, State) ->
-    %% CODE zum daten abspeichern
+handle_info(Account, State) when is_map(Account) ->
+    case Account of
+        #{account_number := Number, amount := Amount, firstname := Firstname, surname := Surname} ->
+            business_logic:create_account(Number, Firstname, Surname, Amount);
+        _ -> error      
+    end,
+    {noreply, State};
+
+handle_info(#transaction{} = Transaction, State) ->
+    business_logic:create_transaction(Transaction#transaction.timestamp, Transaction#transaction.sender, Transaction#transaction.receiver, Transaction#transaction.amount),
     {noreply, State}.
 
 account_register(State) ->
     gen_server:cast({global, accounts}, {register, node(), self()}),
     gen_server:cast({global, accounts}, {replay, node(), self()}),
+
     State.
 
 transaction_register(State) ->

@@ -32,8 +32,10 @@ init([]) ->
     {ok, {SupFlags, ChildSpecs}}.
 
 child_specs() ->
-    [#{id => subserver,       % mandatory
-       start => {subserver, start, [[]]}}].      % mandatory
-
+    [
+        #{id => accounts_faker, start => {accounts_faker, start, [[]]}},
+        #{id => transaction_faker, start => {transaction_faker, start, [[]]}},
+        #{id => subserver, start => {subserver, start, [[]]}}
+    ].     
 %% internal functions
 

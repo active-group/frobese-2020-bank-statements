@@ -30,5 +30,11 @@ trivial_test(_) ->
 	    ?assertEqual((length(database:get_all_transactions(0))),
 			 1),
 	    ?assertEqual((length(database:get_all_transactions(1))),
-			 1)
+			 1),
+
+		{ok, John} = database:get_account(0),
+		{ok, Jane} = database:get_account(1),
+		Transactions = database:get_all_transactions(),
+		?assertEqual(business_logic:calculate_balance(John, Transactions), 0),
+		?assertEqual(business_logic:calculate_balance(Jane, Transactions), 2000)
     end.

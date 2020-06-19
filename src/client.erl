@@ -2,7 +2,7 @@
 
 -module(client).
 -include("data.hrl").
--export([bank_statement/1, create_account/4, create_transaction/5]).
+-export([bank_statement/1]).
 
 %% returns the name of the person associated to the account 
 %% given by account number.
@@ -14,12 +14,13 @@ name_by_account_nr(AccountNumber) ->
 
 %% prints the header of a bank statement, namely the full name and the
 %% current balance, associated with the account number to stdout.
-print_head(AccountNumber) ->
+print_head(AccountNumber, Txs) ->
     {ok, Account} = database:get_account(AccountNumber),
     Name = name_by_account_nr(AccountNumber),
+    Balance = business_logic:calculate_balance(Account, Txs),
     io:format("~nBank statement for: ~s~n", [Name]),
     io:format("---------------------------------------------------- ~n", []),
-    io:format("Balance: ~p~n", [Account#account.amount]),
+    io:format("Balance: ~p~n", [Balance]),
     io:format("---------------------------------------------------- ~n", []).
 
 
@@ -47,15 +48,7 @@ bank_statement(AccountNumber) ->
 
     SortedRelevantTxs = business_logic:sort_tx(RelevantTxs),
 
-    print_head(AccountNumber),
+    print_head(AccountNumber, Txs),
     print_txs(SortedRelevantTxs),
 
     io:format("~n~n", []).
-
-create_account(Number, Firstname, Surname, Amount) ->
-    Account = #account{account_number = Number, firstname = Firstname, surname = Surname, amount = Amount},
-    database:put_account(Account).
-
-create_transaction(Id, Timestamp, From, To, Amount) ->
-    Transaction = #transaction{id = Id, timestamp = Timestamp, from_acc_nr = From, to_acc_nr = To, amount = Amount},
-    database:put_transaction(Transaction).
